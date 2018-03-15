@@ -76,6 +76,10 @@ export default class NoteCell extends React.PureComponent {
       deleting: {
         color: GlobalStyles.constants().mainTintColor,
         marginBottom: 5,
+      },
+
+      highlight: {
+        backgroundColor: GlobalStyles.constants().mainTintColor
       }
     });
   }
@@ -112,6 +116,7 @@ export default class NoteCell extends React.PureComponent {
 
   static ActionSheetCancelIndex = 0;
   static ActionSheetDestructiveIndex = 4;
+  static highlightId = 0;
 
   actionSheetActions() {
     var pinAction = this.props.item.pinned ? "Unpin" : "Pin";
@@ -146,6 +151,33 @@ export default class NoteCell extends React.PureComponent {
       this.forceUpdate();
     });
 
+  }
+
+  highlightSearchTerms = (note) => {
+    const textStyle = this.aggregateStyles(this.styles.noteText, this.styles.noteTextSelected, this.state.selected);
+
+    if (!this.props.searchTerm || this.props.searchTerm.length === 0) {
+      return (<Text numberOfLines={2} style={textStyle}>{note.text}</Text>);
+    }
+
+    const searchTermRe = new RegExp(`(${this.props.searchTerm})`, 'i');
+    // The number of characters in a note that displays varies by screen width.
+    // As a rough estimate, assume that the max number of visible characters
+    // is 280 (twice the twitter limit).
+    const visibletext = note.text.slice(0, 280);
+    // Split truncated text by searchterm, and also capture searchTerm matches
+    const splitText = visibletext.split(searchTermRe);
+    // Highlight occurences of searchterm in the visibleText.
+    return (
+      <Text numberOfLines={2} style={textStyle}>
+        {splitText.map((text) => {
+          if (searchTermRe.test(text)) {
+            return (<Text key={note.uuid + '-highlight-' + NoteCell.highlightId++} style={this.styles.highlight}>{text}</Text>);
+          } else {
+            return text;
+          }
+        })}
+      </Text>);
   }
 
   render() {
@@ -192,9 +224,7 @@ export default class NoteCell extends React.PureComponent {
               <Text style={this.aggregateStyles(this.styles.noteTitle, this.styles.noteTitleSelected, this.state.selected)}>{note.title}</Text>
             }
 
-            {note.safeText().length > 0 &&
-              <Text numberOfLines={2} style={this.aggregateStyles(this.styles.noteText, this.styles.noteTextSelected, this.state.selected)}>{note.text}</Text>
-            }
+          {note.safeText().length > 0 && this.highlightSearchTerms(note)}
 
             <Text
               numberOfLines={1}

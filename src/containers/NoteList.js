@@ -67,6 +67,7 @@ export default class NoteList extends Component {
         archived={item.archived}
         sortType={this.props.sortType}
         renderTags={renderTags}
+        searchTerm={this.props.searchTerm}
       />
     )
   }

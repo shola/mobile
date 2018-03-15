@@ -415,6 +415,7 @@ export default class Notes extends Abstract {
             decrypting={this.state.decrypting}
             loading={this.state.loading}
             selectedTags={tags}
+            searchTerm={this.options.searchTerm}
           />
         }
 
